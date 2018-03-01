@@ -1,14 +1,14 @@
 import MySQLdb
 
 from .hasher import salt_txt, encrypt, decrypt
-
+from app_setting import db_host, db_name, db_pass, db_user
 
 class DB(object):
     def __init__(self, private_key, public_key):
-        self.conn=MySQLdb.connect(host="localhost",
-                          user="root",
-                          passwd="123456",
-                          db="remote_test")
+        self.conn=MySQLdb.connect(host=db_host,
+                          user=db_user,
+                          passwd=db_pass,
+                          db=db_name)
 
         self.private_key = private_key
         self.public_key = public_key
