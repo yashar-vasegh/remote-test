@@ -6,7 +6,7 @@ from app_setting import db_host, db_name, db_pass, db_user
 
 class DB(object):
     def __init__(self, private_key, public_key):
-        if True or os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
+        if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
             CLOUDSQL_CONNECTION_NAME = os.environ.get('CLOUDSQL_CONNECTION_NAME')
             CLOUDSQL_USER = os.environ.get('CLOUDSQL_USER')
             CLOUDSQL_PASSWORD = os.environ.get('CLOUDSQL_PASSWORD')
