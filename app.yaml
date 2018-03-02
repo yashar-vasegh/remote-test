@@ -1,0 +1,19 @@
+runtime: python
+env: flex
+entrypoint: gunicorn -b :$PORT index:app
+
+runtime_config:
+  python_version: 3
+
+handlers:
+- url: /.*
+  script: index.app
+
+env_variables:
+    CLOUDSQL_CONNECTION_NAME: compact-circlet-196713:us-central1:db-1
+    CLOUDSQL_USER: root
+    CLOUDSQL_PASSWORD: xxxxxxx
+
+    SQLALCHEMY_DATABASE_URI: >-
+      mysql+pymysql://CLOUDSQL_USER:CLOUDSQL_PASSWORD@/DATABASE?unix_socket=/cloudsql/INSTANCE_CONNECTION_NAME
+
