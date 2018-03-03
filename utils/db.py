@@ -1,26 +1,13 @@
 import pymysql.cursors
-import os
 
+from app_setting import DB_CONNECTION_DICT
 from .hasher import salt_txt, encrypt, decrypt
-from app_setting import db_host, db_name, db_pass, db_user
+
 
 class DB(object):
     def __init__(self, private_key, public_key):
-        if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
-            CLOUDSQL_CONNECTION_NAME = os.environ.get('CLOUDSQL_CONNECTION_NAME')
-            CLOUDSQL_USER = os.environ.get('CLOUDSQL_USER')
-            CLOUDSQL_PASSWORD = os.environ.get('CLOUDSQL_PASSWORD')
-            cloudsql_unix_socket = os.path.join('/cloudsql', CLOUDSQL_CONNECTION_NAME)
 
-            self.conn = pymysql.connect(
-                unix_socket=cloudsql_unix_socket,
-                user=CLOUDSQL_USER,
-                passwd=CLOUDSQL_PASSWORD)
-        else:
-            self.conn=pymysql.connect(host=db_host,
-                              user=db_user,
-                              passwd=db_pass,
-                              db=db_name)
+        self.conn = pymysql.connect(**DB_CONNECTION_DICT)
 
         self.private_key = private_key
         self.public_key = public_key
@@ -36,9 +23,11 @@ class DB(object):
         count = self.cursor.fetchone()
         if count:
             count = count[0]
-        else: count = 0
+        else:
+            count = 0
         return salted, count
 
+    # this is not thread safe
     def update_db_word(self, word, count_added):
         salted, count = self.get_word(word)
         if count:
@@ -51,21 +40,8 @@ class DB(object):
                                                               count_added))
             count = count_added
 
-
         self.cursor.close()
         return count
-
-    def get_hash_word(self, hash):
-        word = decrypt(hash, self.private_key, self.public_key, cypher='AES')
-        self.cursor.execute('''
-            select count from data where id = %s
-        ''', (hash,))
-
-        count = self.cursor.fetchone()
-        if count:
-            count = count[0]
-        else: count = 0
-        return word, count
 
     def get_top_100(self):
         result = []
@@ -75,5 +51,3 @@ class DB(object):
         for item in self.cursor.fetchall():
             result.append((decrypt(item[1], self.private_key, self.public_key), item[2]))
         return result
-
-

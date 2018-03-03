@@ -23,7 +23,10 @@ def get_url(url):
     :return: content of response
     '''
     try:
-        response = get(url)
+        try:
+            response = get(url)
+        except:
+            return None
         if is_good_response(response):
             content = response.content
         else:
